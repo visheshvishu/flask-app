@@ -1,48 +1,33 @@
-version: "3.8"
-
 services:
-  mysql:
-    user: "${UID}:${GID}" 
-    image: mysql:5.7
-    container_name: mysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: devops
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: admin
-    volumes:
-      - ./mysql-data:/var/lib/mysql
-      - ./message.sql:/docker-entrypoint-initdb.d/message.sql  
+  db:
+    image: mysql:8.0
     networks:
-      - twotier
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
+      - custom_network
+    container_name: mysql-container
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: flaskapp
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
 
-  flask-app:
-    image: trainwithshubham/two-tier-flask-app:latest
-    container_name: flask-app
+  web:
+    image: flask-mysql-app:latest
+    networks:
+      - custom_network
+    container_name: flask_app
+    env_file:
+      - .env
     ports:
       - "5000:5000"
-    environment:
-      MYSQL_HOST: mysql
-      MYSQL_USER: root
-      MYSQL_PASSWORD: root
-      MYSQL_DB: devops
     depends_on:
-      - mysql
-    networks:
-      - twotier
+      - db
     restart: always
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:5000/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-
+    
+volumes:
+  db_data:
 networks:
-  twotier:
+  custom_network:
+    driver: bridge
+
