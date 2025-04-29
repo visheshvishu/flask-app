@@ -3,9 +3,9 @@
 pipeline {
     agent { label 'gcp' }
 
-    triggers {
-        cron('H/5 * * * *')  // Runs every 5 minutes
-    }
+    // triggers {
+    //     cron('H/5 * * * *')  // Runs every 5 minutes
+    // }
 
     environment {
         scannerHome = tool 'sonar' 
