@@ -81,12 +81,30 @@ pipeline {
     } //end of stages
         
 
+    // post {
+    //     success {
+    //         echo 'pipeline completed successfully.'
+    //     }
+    //     failure {
+    //         echo 'pipeline failed. Check logs for details.'
+    //     }
+    // }
+
     post {
-        success {
-            echo 'pipeline completed successfully.'
-        }
-        failure {
-            echo 'pipeline failed. Check logs for details.'
-        }
+    success {
+      emailext(
+        subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+        body: "Job Succeeded: ${env.BUILD_URL}",
+        to: 'vishesh.gupta@oodles.io'
+      )
     }
+    failure {
+      emailext(
+        subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+        body: "Job Failed: ${env.BUILD_URL}",
+        to: 'vishesh.gupta@oodles.io'
+      )
+    }
+  }
+    
 } //end of pipeline
